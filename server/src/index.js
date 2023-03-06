@@ -2,6 +2,8 @@
 const express = require("express");
 const cors = require("cors");
 const database = require("./config/database");
+const bcrypt = require("bcrypt");
+const { v4: uuid } = require("uuid");
 require("dotenv").config();
 
 const server = express();
@@ -11,16 +13,19 @@ server.use(cors());
 
 server.post("/login", (request, response) => {
     const { username, password } = request.body;
+
     database.query(
-        `SELECT * FROM user WHERE name = '${username}' LIMIT 1`,
-        (err, result) => {
+        `SELECT * FROM user WHERE user_name = '${username}' LIMIT 1`,
+        async (err, result) => {
             if (err) throw err;
 
             if (result.length != 0 && result != null) {
-                _username = result[0].name;
-                _password = result[0].password;
+                _username = result[0].user_name;
+                _password = result[0].user_password;
 
-                if (username == _username && password == _password) {
+                const login = await bcrypt.compare(password, _password);
+
+                if (username == _username && (await login) == true) {
                     response.json({ type: "success" });
                 } else {
                     response.json({ type: "failed" });
@@ -34,8 +39,12 @@ server.post("/login", (request, response) => {
 
 server.post("/signup", async (request, response) => {
     const { username, password } = request.body;
+
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+
     await database.query(
-        `INSERT INTO user (name, password) VALUES ('${username}', '${password}');`,
+        `INSERT INTO user (account_id, user_name, user_password) VALUES ('${uuid()}', '${username}', '${hash}');`,
         (err) => {
             if (err) throw err;
         }
