@@ -5,6 +5,7 @@ const database = require("./config/database");
 const bcrypt = require("bcrypt");
 const { v4: uuid } = require("uuid");
 const errorHandling = require("./helper/errorHandling");
+const generatePassword = require("./helper/password");
 require("dotenv").config();
 
 const server = express();
@@ -16,7 +17,7 @@ server.post("/login", (request, response, next) => {
     const { username, password } = request.body;
 
     database.query(
-        `SELECT * FROM user WHERE user_namef = '${username}' LIMIT 1`,
+        `SELECT * FROM user WHERE user_name = '${username}' LIMIT 1`,
         async (err, result) => {
             if (err) {
                 next(err);
@@ -45,8 +46,7 @@ server.post("/login", (request, response, next) => {
 server.post("/signup", async (request, response, next) => {
     const { username, password } = request.body;
 
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(password, salt);
+    const hash = await generatePassword(password, 10);
 
     await database.query(
         `INSERT INTO user (account_id, user_name, user_password) VALUES ('${uuid()}', '${username}', '${hash}');`,

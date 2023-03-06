@@ -1,3 +1,10 @@
-const { v4: uuid } = require("uuid");
+const bcrypt = require("bcrypt");
 
-console.log(uuid());
+const generatePassword = async (password, key) => {
+    const salt = await bcrypt.genSalt(key);
+    const hash = await bcrypt.hash(password, salt);
+
+    return await hash;
+};
+
+module.exports = generatePassword;
