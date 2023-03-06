@@ -42,7 +42,7 @@ server.post("/login", (request, response, next) => {
     );
 });
 
-server.post("/signup", async (request, response) => {
+server.post("/signup", async (request, response, next) => {
     const { username, password } = request.body;
 
     const salt = await bcrypt.genSalt(10);
@@ -51,7 +51,7 @@ server.post("/signup", async (request, response) => {
     await database.query(
         `INSERT INTO user (account_id, user_name, user_password) VALUES ('${uuid()}', '${username}', '${hash}');`,
         (err) => {
-            if (err) throw err;
+            if (err) next(err);
         }
     );
 
