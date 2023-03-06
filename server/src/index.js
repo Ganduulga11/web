@@ -4,6 +4,7 @@ const cors = require("cors");
 const database = require("./config/database");
 const bcrypt = require("bcrypt");
 const { v4: uuid } = require("uuid");
+const errorHandling = require("./helper/errorHandling");
 require("dotenv").config();
 
 const server = express();
@@ -11,13 +12,17 @@ const server = express();
 server.use(express.json());
 server.use(cors());
 
-server.post("/login", (request, response) => {
+server.post("/login", (request, response, next) => {
     const { username, password } = request.body;
 
     database.query(
-        `SELECT * FROM user WHERE user_name = '${username}' LIMIT 1`,
+        `SELECT * FROM user WHERE user_namef = '${username}' LIMIT 1`,
         async (err, result) => {
-            if (err) throw err;
+            if (err) {
+                next(err);
+
+                return;
+            }
 
             if (result.length != 0 && result != null) {
                 _username = result[0].user_name;
@@ -52,6 +57,8 @@ server.post("/signup", async (request, response) => {
 
     await response.json({ type: "success" });
 });
+
+server.use(errorHandling);
 
 //* Server listen on port
 const port = process.env.PORT;
