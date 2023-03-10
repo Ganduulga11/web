@@ -9,6 +9,8 @@ const login = async (request, response, next) => {
 
     const userData = await userModel.getUser(username);
 
+    console.log(userData);
+
     if (userData != null) {
         _username = userData.user_name;
         _password = userData.user_password;
@@ -23,8 +25,6 @@ const login = async (request, response, next) => {
     } else {
         response.json({ type: "user not found" });
     }
-
-    response.json("hell");
 };
 
 const signup = async (request, response, next) => {

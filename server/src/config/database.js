@@ -1,4 +1,4 @@
-const mysql = require("mysql");
+const mysql = require("mysql2");
 require("dotenv").config();
 
 const database = mysql.createConnection({
@@ -14,4 +14,6 @@ database.connect((err) => {
     console.log("Database connected...");
 });
 
-module.exports = database;
+const PromiseConnection = database.promise();
+
+module.exports = PromiseConnection;
